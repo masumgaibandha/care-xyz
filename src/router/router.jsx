@@ -10,20 +10,21 @@ import MyBookings from "../pages/MyBookings";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import NotFound from "../pages/NotFound";
+import PrivateRoute from "../routes/PrivateRoute";
 
 
 export const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <MainLayout />,
-    children: [
-      { path: "/", element: <Home /> },
-      { path: "/service/:service_id", element: <ServiceDetails /> },
-      { path: "/booking/:service_id", element: <Booking /> },
-      { path: "/my-bookings", element: <MyBookings /> },
-      { path: "/login", element: <Login /> },
-      { path: "/register", element: <Register /> },
-      { path: "*", element: <NotFound /> },
-    ],
-  },
+    {
+        path: "/",
+        element: <MainLayout />,
+        children: [
+            { path: "/", element: <Home /> },
+            { path: "/service/:service_id", element: <ServiceDetails /> },
+            { path: "/booking/:service_id", element: <PrivateRoute><Booking /></PrivateRoute> },
+            { path: "/my-bookings", element: <PrivateRoute><MyBookings /></PrivateRoute> },
+            { path: "/login", element: <Login /> },
+            { path: "/register", element: <Register /> },
+            { path: "*", element: <NotFound /> },
+        ],
+    },
 ]);
