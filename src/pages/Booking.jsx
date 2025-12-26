@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
 const servicePrice = {
     baby: 350,
@@ -7,15 +8,26 @@ const servicePrice = {
     sick: 400,
 };
 
+const serviceTitle = {
+    baby: "Baby Care",
+    elderly: "Elderly Care",
+    sick: "Sick Care",
+};
+
 export default function Booking() {
+    const { user } = useContext(AuthContext);
     const { service_id } = useParams();
     const navigate = useNavigate();
 
     const pricePerHour = servicePrice[service_id] ?? 0;
+    const title = serviceTitle[service_id] ?? service_id;
 
+    // ✅ AG fields
     const [duration, setDuration] = useState("");
     const [division, setDivision] = useState("");
-    const [cityArea, setCityArea] = useState("");
+    const [district, setDistrict] = useState("");
+    const [city, setCity] = useState("");
+    const [area, setArea] = useState("");
     const [address, setAddress] = useState("");
 
     const total = useMemo(() => {
@@ -25,23 +37,47 @@ export default function Booking() {
     }, [duration, pricePerHour]);
 
     const canSubmit =
-        duration && division && cityArea.trim() && address.trim() && total > 0;
+        !!user?.email &&
+        duration &&
+        division &&
+        district &&
+        city &&
+        area &&
+        address.trim() &&
+        total > 0;
 
     const handleConfirm = () => {
+        if (!user?.email) return;
+
         const newBooking = {
             id: crypto.randomUUID(),
+            userEmail: user.email,
+
             serviceId: service_id,
+            serviceName: title,
+            ratePerHour: pricePerHour,
+
             durationHours: Number(duration),
+
+            // ✅ Location (AG)
             division,
-            cityArea: cityArea.trim(),
+            district,
+            city,
+            area,
             address: address.trim(),
+
             total,
+
+            // ✅ Status (AG)
             status: "Pending",
             createdAt: new Date().toISOString(),
         };
 
-        const prev = JSON.parse(localStorage.getItem("care_bookings") || "[]");
-        localStorage.setItem("care_bookings", JSON.stringify([newBooking, ...prev]));
+        // ✅ Per-user storage key
+        const key = `care_bookings_${user.email}`;
+
+        const prev = JSON.parse(localStorage.getItem(key) || "[]");
+        localStorage.setItem(key, JSON.stringify([newBooking, ...prev]));
 
         alert("Booking saved! Status: Pending");
         navigate("/my-bookings");
@@ -51,11 +87,12 @@ export default function Booking() {
         <div className="max-w-4xl mx-auto px-4 py-10">
             <h1 className="text-2xl font-bold mb-2">Book Service</h1>
             <p className="text-base-content/70 mb-6">
-                Service: <span className="font-semibold">{service_id}</span> • Rate:{" "}
+                Service: <span className="font-semibold">{title}</span> • Rate:{" "}
                 <span className="font-semibold">৳{pricePerHour}/hour</span>
             </p>
 
             <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                {/* Duration */}
                 <div>
                     <label className="block font-semibold mb-2">Duration (hours)</label>
                     <select
@@ -73,8 +110,9 @@ export default function Booking() {
                     </select>
                 </div>
 
+                {/* Location: Division */}
                 <div>
-                    <label className="block font-semibold mb-2">Location (Division)</label>
+                    <label className="block font-semibold mb-2">Division</label>
                     <select
                         value={division}
                         onChange={(e) => setDivision(e.target.value)}
@@ -84,33 +122,83 @@ export default function Booking() {
                             Choose division
                         </option>
                         <option>Dhaka</option>
-                        <option>Chittagong</option>
+                        <option>Chattogram</option>
                         <option>Khulna</option>
                         <option>Rajshahi</option>
+                        <option>Barishal</option>
+                        <option>Sylhet</option>
+                        <option>Rangpur</option>
+                        <option>Mymensingh</option>
                     </select>
                 </div>
 
-                <div>
-                    <label className="block font-semibold mb-2">City / Area</label>
-                    <input
-                        value={cityArea}
-                        onChange={(e) => setCityArea(e.target.value)}
-                        type="text"
-                        placeholder="City or area"
-                        className="input input-bordered w-full"
-                    />
+                {/* Location: District / City / Area */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label className="block font-semibold mb-2">District</label>
+                        <select
+                            value={district}
+                            onChange={(e) => setDistrict(e.target.value)}
+                            className="select select-bordered w-full"
+                        >
+                            <option value="" disabled>
+                                Select district
+                            </option>
+                            <option>Dhaka</option>
+                            <option>Gazipur</option>
+                            <option>Narayanganj</option>
+                            <option>Chattogram</option>
+                            <option>Cumilla</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block font-semibold mb-2">City</label>
+                        <select
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                            className="select select-bordered w-full"
+                        >
+                            <option value="" disabled>
+                                Select city
+                            </option>
+                            <option>Dhaka City</option>
+                            <option>Gazipur City</option>
+                            <option>Chattogram City</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block font-semibold mb-2">Area</label>
+                        <select
+                            value={area}
+                            onChange={(e) => setArea(e.target.value)}
+                            className="select select-bordered w-full"
+                        >
+                            <option value="" disabled>
+                                Select area
+                            </option>
+                            <option>Mirpur</option>
+                            <option>Dhanmondi</option>
+                            <option>Uttara</option>
+                            <option>Banani</option>
+                            <option>Mohammadpur</option>
+                        </select>
+                    </div>
                 </div>
 
+                {/* Address */}
                 <div>
                     <label className="block font-semibold mb-2">Address</label>
                     <textarea
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
-                        placeholder="Enter detailed address"
+                        placeholder="House/Road details"
                         className="textarea textarea-bordered w-full"
                     />
                 </div>
 
+                {/* Total */}
                 <div>
                     <label className="block font-semibold mb-2">Total cost</label>
                     <input

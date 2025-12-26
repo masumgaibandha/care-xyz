@@ -1,11 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
-const serviceTitle = {
-    baby: "Baby Care",
-    elderly: "Elderly Care",
-    sick: "Sick Care",
-};
 
 function badgeClass(status) {
     if (status === "Pending") return "badge badge-warning";
@@ -16,27 +12,33 @@ function badgeClass(status) {
 }
 
 export default function MyBookings() {
+    const { user } = useContext(AuthContext);
     const [bookings, setBookings] = useState([]);
 
+    const key = user?.email ? `care_bookings_${user.email}` : null;
+
     const load = () => {
-        const data = JSON.parse(localStorage.getItem("care_bookings") || "[]");
+        if (!key) return;
+        const data = JSON.parse(localStorage.getItem(key) || "[]");
         setBookings(data);
     };
 
     useEffect(() => {
         load();
-    }, []);
-
-    const hasBookings = bookings.length > 0;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [key]);
 
     const rows = useMemo(() => bookings, [bookings]);
 
     const handleCancel = (id) => {
+        if (!key) return;
+
         const next = bookings.map((b) =>
             b.id === id ? { ...b, status: "Cancelled" } : b
         );
+
         setBookings(next);
-        localStorage.setItem("care_bookings", JSON.stringify(next));
+        localStorage.setItem(key, JSON.stringify(next));
     };
 
     return (
@@ -45,7 +47,7 @@ export default function MyBookings() {
                 <div>
                     <h1 className="text-2xl font-bold">My Bookings</h1>
                     <p className="text-base-content/60">
-                        Track booking status and manage your bookings.
+                        Track your booking status and manage your bookings.
                     </p>
                 </div>
 
@@ -54,7 +56,7 @@ export default function MyBookings() {
                 </Link>
             </div>
 
-            {!hasBookings ? (
+            {rows.length === 0 ? (
                 <div className="card bg-base-100 shadow border border-base-200">
                     <div className="card-body">
                         <h2 className="card-title">No bookings yet</h2>
@@ -81,24 +83,44 @@ export default function MyBookings() {
                                 <th className="text-right">Action</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             {rows.map((b) => (
                                 <tr key={b.id}>
-                                    <td className="font-semibold">
-                                        {serviceTitle[b.serviceId] || b.serviceId}
-                                    </td>
+                                    <td className="font-semibold">{b.serviceName || b.serviceId}</td>
+
                                     <td>{b.durationHours} hour(s)</td>
+
+                                    {/* ✅ Full AG location */}
                                     <td>
                                         <div className="text-sm">
-                                            <div className="font-medium">{b.division}</div>
-                                            <div className="text-base-content/60">{b.cityArea}</div>
+                                            <div className="font-medium">
+                                                {b.division}, {b.district}
+                                            </div>
+                                            <div className="text-base-content/70">
+                                                {b.city}, {b.area}
+                                            </div>
+                                            <div className="text-base-content/50 text-xs mt-1">
+                                                {b.address}
+                                            </div>
                                         </div>
                                     </td>
+
                                     <td>৳{b.total}</td>
+
                                     <td>
                                         <span className={badgeClass(b.status)}>{b.status}</span>
                                     </td>
-                                    <td className="text-right">
+
+                                    {/* ✅ View Details + Cancel (AG) */}
+                                    <td className="text-right space-x-2">
+                                        <Link
+                                            to={`/my-bookings/${b.id}`}
+                                            className="btn btn-outline btn-sm"
+                                        >
+                                            View Details
+                                        </Link>
+
                                         <button
                                             className="btn btn-error btn-outline btn-sm"
                                             onClick={() => handleCancel(b.id)}
@@ -118,7 +140,7 @@ export default function MyBookings() {
                     </table>
 
                     <div className="p-4 text-sm text-base-content/60">
-                        Tip: Status update to Confirmed/Completed will be done later (admin/payment step).
+                        Note: Status updates to Confirmed/Completed can be added later (admin/payment).
                     </div>
                 </div>
             )}
