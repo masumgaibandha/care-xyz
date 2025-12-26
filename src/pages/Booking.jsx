@@ -22,7 +22,6 @@ export default function Booking() {
     const pricePerHour = servicePrice[service_id] ?? 0;
     const title = serviceTitle[service_id] ?? service_id;
 
-    // ✅ AG fields
     const [duration, setDuration] = useState("");
     const [division, setDivision] = useState("");
     const [district, setDistrict] = useState("");
@@ -59,7 +58,6 @@ export default function Booking() {
 
             durationHours: Number(duration),
 
-            // ✅ Location (AG)
             division,
             district,
             city,
@@ -67,19 +65,40 @@ export default function Booking() {
             address: address.trim(),
 
             total,
-
-            // ✅ Status (AG)
             status: "Pending",
             createdAt: new Date().toISOString(),
         };
 
         // ✅ Per-user storage key
         const key = `care_bookings_${user.email}`;
-
         const prev = JSON.parse(localStorage.getItem(key) || "[]");
         localStorage.setItem(key, JSON.stringify([newBooking, ...prev]));
 
-        alert("Booking saved! Status: Pending");
+        // ✅ Email invoice (AG) - opens user's email client
+        const subject = encodeURIComponent(
+            `Care.xyz Invoice - ${newBooking.serviceName}`
+        );
+        const body = encodeURIComponent(
+            `Hello ${user?.displayName || "User"},\n\n` +
+            `Your booking has been placed successfully.\n\n` +
+            `Invoice Details:\n` +
+            `- Booking ID: ${newBooking.id}\n` +
+            `- Service: ${newBooking.serviceName}\n` +
+            `- Duration: ${newBooking.durationHours} hour(s)\n` +
+            `- Rate: ৳${newBooking.ratePerHour}/hour\n` +
+            `- Total: ৳${newBooking.total}\n` +
+            `- Status: ${newBooking.status}\n` +
+            `- Date: ${new Date(newBooking.createdAt).toLocaleString()}\n\n` +
+            `Location:\n` +
+            `${newBooking.division}, ${newBooking.district}, ${newBooking.city}, ${newBooking.area}\n` +
+            `${newBooking.address}\n\n` +
+            `Thank you for using Care.xyz\n`
+        );
+
+        // Opens mail compose
+        window.location.href = `mailto:${user.email}?subject=${subject}&body=${body}`;
+
+        alert("Booking saved! Invoice email draft opened.");
         navigate("/my-bookings");
     };
 
@@ -110,7 +129,7 @@ export default function Booking() {
                     </select>
                 </div>
 
-                {/* Location: Division */}
+                {/* Division */}
                 <div>
                     <label className="block font-semibold mb-2">Division</label>
                     <select
@@ -132,7 +151,7 @@ export default function Booking() {
                     </select>
                 </div>
 
-                {/* Location: District / City / Area */}
+                {/* District / City / Area */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label className="block font-semibold mb-2">District</label>

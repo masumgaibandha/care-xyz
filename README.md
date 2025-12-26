@@ -1,16 +1,47 @@
-# React + Vite
+# Care.xyz / Care.IO — Baby Sitting & Elderly Care Service Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A caregiving service platform where users can view services, book services based on duration & location, and track booking status.
 
-Currently, two official plugins are available:
+## Live Link
+(TODO after deployment)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## GitHub Repo
+https://github.com/masumgaibandha/care-xyz
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Assignment Requirements (Implemented)
+- ✅ Responsive Design (Mobile / Tablet / Desktop)
+- ✅ Authentication: Email/Password + Google
+- ✅ Services Overview: Baby Care, Elderly Care, Sick Care
+- ✅ Service Details Page (`/service/:service_id`)
+- ✅ Booking Page (Private) (`/booking/:service_id`)
+  - Duration selection
+  - Location: Division, District, City, Area + Address
+  - Auto total cost calculation (duration × rate)
+  - Booking status saved as **Pending**
+  - Email invoice (mailto draft)
+- ✅ My Bookings Page (Private) (`/my-bookings`)
+  - List bookings with status
+  - View Details
+  - Cancel booking
+- ✅ 404 Not Found Page
+- ✅ Environment variables for Firebase config
+- ✅ Metadata (SEO) on Home + Service Details
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Tech Stack
+- React + Vite
+- React Router DOM
+- Firebase Authentication
+- TailwindCSS + DaisyUI
+- react-helmet-async (SEO metadata)
+
+---
+
+## How to Run Locally
+1. Clone the repo
+2. Install dependencies
+   ```bash
+   npm install --legacy-peer-deps
