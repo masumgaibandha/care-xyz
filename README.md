@@ -3,7 +3,7 @@
 A caregiving service platform where users can view services, book services based on duration & location, and track booking status.
 
 ## Live Link
-(TODO after deployment)
+https://care-xyz-d1ce7.web.app
 
 ## GitHub Repo
 https://github.com/masumgaibandha/care-xyz
